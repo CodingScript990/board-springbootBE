@@ -1,6 +1,7 @@
 package com.codescript.springboard.controller;
 
 import com.codescript.springboard.dto.ResponseDto;
+import com.codescript.springboard.dto.SignInDto;
 import com.codescript.springboard.dto.SignInResponseDto;
 import com.codescript.springboard.dto.SignUpDto;
 import com.codescript.springboard.service.AuthService;
@@ -20,8 +21,20 @@ public class AuthController {
 		public ResponseDto<?> signUp(@RequestBody SignUpDto requestBody) {
 				// 결과를 반환해주기 위함
 				ResponseDto<?> result = authService.signUp(requestBody);
+				// output 결과를 check 해주기 위함
+				System.out.println("signUp = " + requestBody);
 				// return value;
-				System.out.println("requestBody = " + requestBody);
+				return result;
+		}
+
+		// ResponseDto type signIn function
+		@PostMapping("/signIn") // post type[Domain(set)] => "signIn"
+		public ResponseDto<SignInResponseDto> signIn(@RequestBody SignInDto requestBody) {
+				// 결과를 반환해주기 위함
+				ResponseDto<SignInResponseDto> result = authService.signIn(requestBody);
+				// output 결과를 check 해주기 위함
+				System.out.println("signIn = " + requestBody);
+				// return value
 				return result;
 		}
 }
