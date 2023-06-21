@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-
+// JWT : 전자 서명이 된 토큰, JSON 형태로 구성된 토큰
+// 구성 => {header}.{payload}.{signature}
+// header : typ(해당 토큰의 타입), alg(토큰을 서명하기 위해 사용된 해시 알고리즘)
+// payload : sub(해당 토큰의 주인), iat(토큰이 발행된 시간), exp(토큰이 만료되는 시간)
 @Service
 public class TokenProvider {
 		// member field => jwt key setting
