@@ -8,6 +8,8 @@ import com.codescript.springboard.entity.UserEntity;
 import com.codescript.springboard.repository.UserRepository;
 import com.codescript.springboard.security.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service // Service 를 사용하겠다는 의미
@@ -19,6 +21,9 @@ public class AuthService {
 		// TokenProvider 사용하겠다는 의미
 		@Autowired
 		TokenProvider tokenProvider;
+
+		// PasswordEncoder[Interface] Add
+		private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 		// SignUpDto 에서 password, passwordCheck
 		public ResponseDto<?> signUp(SignUpDto dto) {
@@ -44,6 +49,10 @@ public class AuthService {
 				// UserEntity 생성
 				UserEntity userEntity = new UserEntity(dto);
 
+				// Password Encryption[비밀번호 암호화]
+				String encodedPassword = passwordEncoder.encode(userPassword);
+				userEntity.setUserPassword(encodedPassword);
+
 				// try - catch 예외처리
 				try {
 						// UserRepository 를 이용해서 데이터베이스에 Entity 를 저장해줌
@@ -62,23 +71,18 @@ public class AuthService {
 				String userEmail = dto.getUserEmail();
 				String userPassword = dto.getUserPassword();
 
-				// try - catch 예외처리[실패시]
-				try {
-						// userEmail, userPassword 가 존재한다면 값을 반환해주는 작업[true, false]
-						boolean existed = userRepository.existsByUserEmailAndUserPassword(userEmail, userPassword);
-						// 실패시 로그인 페이지에서 로그인 성공시까지 로그인 페이지 유지 및 에러메세지 띄우기!
-						if (!existed) return ResponseDto.setFailed("로그인 정보가 일치하지 않습니다.");
-				} catch (Exception err) {
-						return ResponseDto.setFailed("DB Error!");
-				}
-
 				// UserEntity 초기화
 				UserEntity userEntity = null;
 
 				// try - catch 예외처리
 				try {
 						// userEmail 값을 얻어오는 작업
-						userEntity = userRepository.findById(userEmail).get();
+						userEntity = userRepository.findByUserEmail(userEmail);
+						// UserEntity 값이 null 이면 error message "Sign In Failed" 으로 표기하라[Email]
+						if (userEntity == null) return ResponseDto.setFailed("Sign In Failed");
+						// password, 가 일치 하지 않으면 error message "Sign In Failed" 으로 표기하라[Password]
+						if (!passwordEncoder.matches(userPassword, userEntity.getUserPassword()))
+							return ResponseDto.setFailed("Sign In Failed");
 				} catch (Exception err) {
 						return ResponseDto.setFailed("DB Error!");
 				}
